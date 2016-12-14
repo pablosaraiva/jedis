@@ -1,6 +1,7 @@
 package redis.clients.jedis;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -13,6 +14,8 @@ import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.newsclub.net.unix.AFUNIXSocket;
+import org.newsclub.net.unix.AFUNIXSocketAddress;
 import redis.clients.jedis.commands.ProtocolCommand;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisDataException;
@@ -37,6 +40,7 @@ public class Connection implements Closeable {
   private SSLSocketFactory sslSocketFactory;
   private SSLParameters sslParameters;
   private HostnameVerifier hostnameVerifier;
+  private File unixSocketFile;
 
   public Connection() {
   }
@@ -59,6 +63,7 @@ public class Connection implements Closeable {
   public Connection(final String host, final int port, final boolean ssl,
       SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
       HostnameVerifier hostnameVerifier) {
+
     this.host = host;
     this.port = port;
     this.ssl = ssl;
@@ -165,46 +170,67 @@ public class Connection implements Closeable {
   }
 
   public void connect() {
+    if (unixSocketFile != null && !isConnected()) {
+      doConnectUnixSocket();
+    }
+
     if (!isConnected()) {
-      try {
-        socket = new Socket();
-        // ->@wjw_add
-        socket.setReuseAddress(true);
-        socket.setKeepAlive(true); // Will monitor the TCP connection is
-        // valid
-        socket.setTcpNoDelay(true); // Socket buffer Whetherclosed, to
-        // ensure timely delivery of data
-        socket.setSoLinger(true, 0); // Control calls close () method,
-        // the underlying socket is closed
-        // immediately
-        // <-@wjw_add
+      doTCPConnect();
+    }
+  }
 
-        socket.connect(new InetSocketAddress(host, port), connectionTimeout);
-        socket.setSoTimeout(soTimeout);
+  private void doTCPConnect() {
+    try {
+      socket = new Socket();
+      // ->@wjw_add
+      socket.setReuseAddress(true);
+      socket.setKeepAlive(true); // Will monitor the TCP connection is
+      // valid
+      socket.setTcpNoDelay(true); // Socket buffer Whetherclosed, to
+      // ensure timely delivery of data
+      socket.setSoLinger(true, 0); // Control calls close () method,
+      // the underlying socket is closed
+      // immediately
+      // <-@wjw_add
 
-        if (ssl) {
-          if (null == sslSocketFactory) {
-            sslSocketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
-          }
-          socket = (SSLSocket) sslSocketFactory.createSocket(socket, host, port, true);
-          if (null != sslParameters) {
-            ((SSLSocket) socket).setSSLParameters(sslParameters);
-          }
-          if ((null != hostnameVerifier) &&
-              (!hostnameVerifier.verify(host, ((SSLSocket) socket).getSession()))) {
-            String message = String.format(
-                "The connection to '%s' failed ssl/tls hostname verification.", host);
-            throw new JedisConnectionException(message);
-          }
+      socket.connect(new InetSocketAddress(host, port), connectionTimeout);
+      socket.setSoTimeout(soTimeout);
+
+      if (ssl) {
+        if (null == sslSocketFactory) {
+          sslSocketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
         }
-
-        outputStream = new RedisOutputStream(socket.getOutputStream());
-        inputStream = new RedisInputStream(socket.getInputStream());
-      } catch (IOException ex) {
-        broken = true;
-        throw new JedisConnectionException("Failed connecting to host " 
-            + host + ":" + port, ex);
+        socket = (SSLSocket) sslSocketFactory.createSocket(socket, host, port, true);
+        if (null != sslParameters) {
+          ((SSLSocket) socket).setSSLParameters(sslParameters);
+        }
+        if ((null != hostnameVerifier) &&
+            (!hostnameVerifier.verify(host, ((SSLSocket) socket).getSession()))) {
+          String message = String.format(
+              "The connection to '%s' failed ssl/tls hostname verification.", host);
+          throw new JedisConnectionException(message);
+        }
       }
+      outputStream = new RedisOutputStream(socket.getOutputStream());
+      inputStream = new RedisInputStream(socket.getInputStream());
+    } catch (IOException ex) {
+      broken = true;
+      throw new JedisConnectionException("Failed connecting to host "
+          + host + ":" + port, ex);
+    }
+  }
+
+  private void doConnectUnixSocket() {
+    try {
+      File socketFile = new File(host);
+      socket = AFUNIXSocket.newInstance();
+      socket.connect(new AFUNIXSocketAddress(socketFile), connectionTimeout);
+      socket.setSoTimeout(soTimeout);
+
+      outputStream = new RedisOutputStream(socket.getOutputStream());
+      inputStream = new RedisInputStream(socket.getInputStream());
+    } catch (IOException | RuntimeException e) {
+      // unix socket unavailable, will try host/port.
     }
   }
 
@@ -228,7 +254,7 @@ public class Connection implements Closeable {
   }
 
   public boolean isConnected() {
-    return socket != null && socket.isBound() && !socket.isClosed() && socket.isConnected()
+    return socket != null && !socket.isClosed() && socket.isConnected()
         && !socket.isInputShutdown() && !socket.isOutputShutdown();
   }
 

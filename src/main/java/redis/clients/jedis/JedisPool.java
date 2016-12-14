@@ -1,5 +1,6 @@
 package redis.clients.jedis;
 
+import java.io.File;
 import java.net.URI;
 
 import javax.net.ssl.HostnameVerifier;
@@ -18,6 +19,14 @@ public class JedisPool extends JedisPoolAbstract {
 
   public JedisPool() {
     this(Protocol.DEFAULT_HOST, Protocol.DEFAULT_PORT);
+  }
+
+  public JedisPool(final File unixSocketFile) {
+    this(new GenericObjectPoolConfig(), null, unixSocketFile, Protocol.DEFAULT_DATABASE);
+  }
+
+  public JedisPool(final GenericObjectPoolConfig poolConfig, final String clientName, final File unixSocketFile, final int database) {
+    super(poolConfig, new JedisFactory(clientName, unixSocketFile, database));
   }
 
   public JedisPool(final GenericObjectPoolConfig poolConfig, final String host) {

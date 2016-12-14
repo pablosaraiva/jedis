@@ -1,5 +1,6 @@
 package redis.clients.jedis;
 
+import java.io.File;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -27,6 +28,7 @@ class JedisFactory implements PooledObjectFactory<Jedis> {
   private final String clientName;
   private final boolean ssl;
   private final SSLSocketFactory sslSocketFactory;
+  private final File unixSocketFile;
   private SSLParameters sslParameters;
   private HostnameVerifier hostnameVerifier;
 
@@ -44,6 +46,7 @@ class JedisFactory implements PooledObjectFactory<Jedis> {
     this.sslSocketFactory = sslSocketFactory;
     this.sslParameters = sslParameters;
     this.hostnameVerifier = hostnameVerifier;
+    this.unixSocketFile = null;
   }
 
   public JedisFactory(final URI uri, final int connectionTimeout, final int soTimeout,
@@ -64,6 +67,21 @@ class JedisFactory implements PooledObjectFactory<Jedis> {
     this.sslSocketFactory = sslSocketFactory;
     this.sslParameters = sslParameters;
     this.hostnameVerifier = hostnameVerifier;
+    this.unixSocketFile = null;
+  }
+
+  public JedisFactory(final String clientName, final File unixSocketFile, final int database) {
+    this.hostAndPort.set(null);
+    this.connectionTimeout = Protocol.DEFAULT_TIMEOUT;
+    this.soTimeout = Protocol.DEFAULT_TIMEOUT;
+    this.password = null;
+    this.database = database;
+    this.clientName = clientName;
+    this.ssl = false;
+    this.sslSocketFactory = null;
+    this.sslParameters = null;
+    this.hostnameVerifier = null;
+    this.unixSocketFile = unixSocketFile;
   }
 
   public void setHostAndPort(final HostAndPort hostAndPort) {
