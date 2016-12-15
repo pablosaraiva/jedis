@@ -63,7 +63,6 @@ public class Connection implements Closeable {
   public Connection(final String host, final int port, final boolean ssl,
       SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
       HostnameVerifier hostnameVerifier) {
-
     this.host = host;
     this.port = port;
     this.ssl = ssl;
@@ -172,9 +171,7 @@ public class Connection implements Closeable {
   public void connect() {
     if (unixSocketFile != null && !isConnected()) {
       doConnectUnixSocket();
-    }
-
-    if (!isConnected()) {
+    } else if (!isConnected()) {
       doTCPConnect();
     }
   }
@@ -222,9 +219,8 @@ public class Connection implements Closeable {
 
   private void doConnectUnixSocket() {
     try {
-      File socketFile = new File(host);
       socket = AFUNIXSocket.newInstance();
-      socket.connect(new AFUNIXSocketAddress(socketFile), connectionTimeout);
+      socket.connect(new AFUNIXSocketAddress(unixSocketFile), connectionTimeout);
       socket.setSoTimeout(soTimeout);
 
       outputStream = new RedisOutputStream(socket.getOutputStream());
