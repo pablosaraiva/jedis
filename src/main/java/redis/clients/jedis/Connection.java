@@ -170,10 +170,11 @@ public class Connection implements Closeable {
   }
 
   public void connect() {
-    if (unixSocketFile != null && !isConnected()) {
-      doConnectUnixSocket();
-    } else if (!isConnected()) {
-      doTCPConnect();
+    if (!isConnected()) {
+      if (unixSocketFile != null)
+        doConnectUnixSocket();
+      else
+        doTCPConnect();
     }
   }
 
