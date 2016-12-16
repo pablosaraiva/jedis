@@ -71,7 +71,7 @@ class JedisFactory implements PooledObjectFactory<Jedis> {
   }
 
   public JedisFactory(final String clientName, final File unixSocketFile, final int database) {
-    this.hostAndPort.set(null);
+    this.hostAndPort.set(new HostAndPort(Protocol.DEFAULT_HOST, Protocol.DEFAULT_PORT));
     this.connectionTimeout = Protocol.DEFAULT_TIMEOUT;
     this.soTimeout = Protocol.DEFAULT_TIMEOUT;
     this.password = null;
@@ -118,7 +118,7 @@ class JedisFactory implements PooledObjectFactory<Jedis> {
   public PooledObject<Jedis> makeObject() throws Exception {
     final HostAndPort hostAndPort = this.hostAndPort.get();
     final Jedis jedis = new Jedis(hostAndPort.getHost(), hostAndPort.getPort(), connectionTimeout,
-        soTimeout, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
+        soTimeout, ssl, sslSocketFactory, sslParameters, hostnameVerifier, unixSocketFile);
 
     try {
       jedis.connect();

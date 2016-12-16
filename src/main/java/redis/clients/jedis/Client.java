@@ -2,6 +2,7 @@ package redis.clients.jedis;
 
 import static redis.clients.jedis.Protocol.toByteArray;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,8 +41,8 @@ public class Client extends BinaryClient implements Commands {
 
   public Client(final String host, final int port, final boolean ssl,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier) {
-    super(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
+      final HostnameVerifier hostnameVerifier, final File unixSocketFile) {
+    super(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier, unixSocketFile);
   }
 
   @Override

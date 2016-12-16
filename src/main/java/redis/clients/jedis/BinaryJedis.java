@@ -3,6 +3,7 @@ package redis.clients.jedis;
 import static redis.clients.jedis.Protocol.toByteArray;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.AbstractMap;
@@ -63,7 +64,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   public BinaryJedis(final String host, final int port, final boolean ssl,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier) {
-    client = new Client(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
+    client = new Client(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier, null);
   }
 
   public BinaryJedis(final String host, final int port, final int timeout) {
@@ -81,7 +82,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   public BinaryJedis(final String host, final int port, final int timeout, final boolean ssl,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
       final HostnameVerifier hostnameVerifier) {
-    client = new Client(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
+    client = new Client(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier, null);
     client.setConnectionTimeout(timeout);
     client.setSoTimeout(timeout);
   }
@@ -102,8 +103,8 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
 
   public BinaryJedis(final String host, final int port, final int connectionTimeout,
       final int soTimeout, final boolean ssl, final SSLSocketFactory sslSocketFactory,
-      final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier) {
-    client = new Client(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
+      final SSLParameters sslParameters, final HostnameVerifier hostnameVerifier, final File unixSocketFile) {
+    client = new Client(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier, unixSocketFile);
     client.setConnectionTimeout(connectionTimeout);
     client.setSoTimeout(soTimeout);
   }
@@ -111,7 +112,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
   public BinaryJedis(final JedisShardInfo shardInfo) {
     client = new Client(shardInfo.getHost(), shardInfo.getPort(), shardInfo.getSsl(),
         shardInfo.getSslSocketFactory(), shardInfo.getSslParameters(),
-        shardInfo.getHostnameVerifier());
+        shardInfo.getHostnameVerifier(), null);
     client.setConnectionTimeout(shardInfo.getConnectionTimeout());
     client.setSoTimeout(shardInfo.getSoTimeout());
     client.setPassword(shardInfo.getPassword());
@@ -184,7 +185,7 @@ public class BinaryJedis implements BasicCommands, BinaryJedisCommands, MultiKey
     }
 
     client = new Client(uri.getHost(), uri.getPort(), uri.getScheme().equals("rediss"),
-      sslSocketFactory, sslParameters, hostnameVerifier);
+      sslSocketFactory, sslParameters, hostnameVerifier, null);
 
     String password = JedisURIHelper.getPassword(uri);
     if (password != null) {

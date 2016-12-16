@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,6 +14,7 @@ import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.junit.Assert;
 import org.junit.Test;
 
 import redis.clients.jedis.HostAndPort;
@@ -25,6 +27,15 @@ import redis.clients.jedis.exceptions.JedisException;
 
 public class JedisPoolTest {
   private static HostAndPort hnp = HostAndPortUtil.getRedisServers().get(0);
+
+  @Test
+  public void checkPoolWithUnixDomainSocket() {
+    JedisPool pool = new JedisPool(new File(HostAndPortUtil.getUnixSocketFile()));
+    Jedis jedis = pool.getResource();
+    jedis.connect();
+    String pong = jedis.ping();
+    Assert.assertEquals("PONG", pong);
+  }
 
   @Test
   public void checkConnections() {

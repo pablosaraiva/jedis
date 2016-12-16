@@ -13,6 +13,7 @@ import static redis.clients.jedis.Protocol.Keyword.RESET;
 import static redis.clients.jedis.Protocol.Keyword.STORE;
 import static redis.clients.jedis.Protocol.Keyword.WITHSCORES;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -66,8 +67,8 @@ public class BinaryClient extends Connection {
 
   public BinaryClient(final String host, final int port, final boolean ssl,
       final SSLSocketFactory sslSocketFactory, final SSLParameters sslParameters,
-      final HostnameVerifier hostnameVerifier) {
-    super(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier);
+      final HostnameVerifier hostnameVerifier, final File unixSocketFile) {
+    super(host, port, ssl, sslSocketFactory, sslParameters, hostnameVerifier, unixSocketFile);
   }
 
   public boolean isInMulti() {

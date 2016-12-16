@@ -10,6 +10,7 @@ public final class HostAndPortUtil {
   private static List<HostAndPort> redisHostAndPortList = new ArrayList<HostAndPort>();
   private static List<HostAndPort> sentinelHostAndPortList = new ArrayList<HostAndPort>();
   private static List<HostAndPort> clusterHostAndPortList = new ArrayList<HostAndPort>();
+  private static String unixSocketFile;
 
   private HostAndPortUtil(){
     throw new InstantiationError( "Must not instantiate this class" );
@@ -39,6 +40,7 @@ public final class HostAndPortUtil {
     String envRedisHosts = System.getProperty("redis-hosts");
     String envSentinelHosts = System.getProperty("sentinel-hosts");
     String envClusterHosts = System.getProperty("cluster-hosts");
+    unixSocketFile = System.getProperty("unix-domain-socket");
 
     redisHostAndPortList = parseHosts(envRedisHosts, redisHostAndPortList);
     sentinelHostAndPortList = parseHosts(envSentinelHosts, sentinelHostAndPortList);
@@ -90,5 +92,9 @@ public final class HostAndPortUtil {
 
   public static List<HostAndPort> getClusterServers() {
     return clusterHostAndPortList;
+  }
+
+  public static String getUnixSocketFile() {
+    return unixSocketFile;
   }
 }

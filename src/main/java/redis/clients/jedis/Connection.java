@@ -62,13 +62,14 @@ public class Connection implements Closeable {
 
   public Connection(final String host, final int port, final boolean ssl,
       SSLSocketFactory sslSocketFactory, SSLParameters sslParameters,
-      HostnameVerifier hostnameVerifier) {
+      HostnameVerifier hostnameVerifier, final File unixSocketFile) {
     this.host = host;
     this.port = port;
     this.ssl = ssl;
     this.sslSocketFactory = sslSocketFactory;
     this.sslParameters = sslParameters;
     this.hostnameVerifier = hostnameVerifier;
+    this.unixSocketFile = unixSocketFile;
   }
 
   public Socket getSocket() {
@@ -225,8 +226,9 @@ public class Connection implements Closeable {
 
       outputStream = new RedisOutputStream(socket.getOutputStream());
       inputStream = new RedisInputStream(socket.getInputStream());
-    } catch (IOException | RuntimeException e) {
-      // unix socket unavailable, will try host/port.
+    } catch (IOException e) {
+      throw new JedisConnectionException("Failed connecting to unix domain socket "
+          + unixSocketFile.getAbsolutePath(), e);
     }
   }
 

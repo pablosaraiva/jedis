@@ -87,6 +87,17 @@ appendonly no
 slaveof localhost 6384
 endef
 
+define REDIS8_CONF
+daemonize yes
+port 0
+pidfile /tmp/redis8.pid
+logfile /tmp/redis8.log
+unixsocket /tmp/redis8.sock
+unixsocketperm 777
+save ""
+appendonly no
+endef
+
 # SENTINELS
 define REDIS_SENTINEL1
 port 26379
@@ -227,6 +238,7 @@ export REDIS4_CONF
 export REDIS5_CONF
 export REDIS6_CONF
 export REDIS7_CONF
+export REDIS8_CONF
 export REDIS_SENTINEL1
 export REDIS_SENTINEL2
 export REDIS_SENTINEL3
@@ -282,6 +294,7 @@ stop:
 	kill `cat /tmp/redis5.pid`
 	kill `cat /tmp/redis6.pid`
 	kill `cat /tmp/redis7.pid`
+	kill `cat /tmp/redis8.pid`
 	kill `cat /tmp/sentinel1.pid`
 	kill `cat /tmp/sentinel2.pid`
 	kill `cat /tmp/sentinel3.pid`
