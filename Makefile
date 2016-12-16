@@ -265,6 +265,7 @@ start: stunnel cleanup
 	echo "$$REDIS5_CONF" | redis-server -
 	echo "$$REDIS6_CONF" | redis-server -
 	echo "$$REDIS7_CONF" | redis-server -
+	echo "$$REDIS8_CONF" | redis-server -
 	echo "$$REDIS_SENTINEL1" > /tmp/sentinel1.conf && redis-server /tmp/sentinel1.conf --sentinel
 	@sleep 0.5
 	echo "$$REDIS_SENTINEL2" > /tmp/sentinel2.conf && redis-server /tmp/sentinel2.conf --sentinel
