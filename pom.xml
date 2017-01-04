@@ -8,7 +8,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>jar</packaging>
 	<groupId>redis.clients</groupId>
-	<artifactId>jedis</artifactId>
+	<artifactId>jedis-unix</artifactId>
 	<version>3.0.0-SNAPSHOT</version>
 	<name>Jedis</name>
 	<description>Jedis is a blazingly small and sane Redis java client.</description>
@@ -71,6 +71,11 @@
 			<groupId>com.kohlschutter.junixsocket</groupId>
 			<artifactId>junixsocket-native-common</artifactId>
 			<version>2.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
