@@ -35,7 +35,6 @@ public class ClientUnix extends Client {
         }
     }
 
-
     @Override
     public boolean isConnected() {
         return getSocket() != null && !getSocket().isClosed() && getSocket().isConnected()
@@ -47,19 +46,16 @@ public class ClientUnix extends Client {
     }
 
     private void setOutputStream(RedisOutputStream redisOutputStream) throws NoSuchFieldException, IllegalAccessException {
-        setByReflection(Connection.class, "redisOutputStream", this, redisOutputStream);
-
+        setByReflection(Connection.class, "outputStream", this, redisOutputStream);
     }
 
     private void setInputStream(RedisInputStream redisInputStream) throws NoSuchFieldException, IllegalAccessException {
-        setByReflection(Connection.class, "redisInputStream", this, redisInputStream);
-
+        setByReflection(Connection.class, "inputStream", this, redisInputStream);
     }
 
     private void setByReflection(Class clazz, String fieldName, Object obj, Object value) throws NoSuchFieldException, IllegalAccessException {
         Field f = clazz.getDeclaredField(fieldName);
         f.setAccessible(true);
         f.set(obj, value);
-        f.setAccessible(false);
     }
 }
